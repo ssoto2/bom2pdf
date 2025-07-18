@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79" version="1">
+  <metadata>
+    <timestamp>2025-07-18T13:21:08Z</timestamp>
+    <tools>
+      <tool>
+        <vendor>Google</vendor>
+        <name>Gemini</name>
+      </tool>
+    </tools>
+    <component type="application" bom-ref="pkg:maven/com.test/test-project@13.0.1-SNAPSHOT?type=jar">
+      <publisher>Test Company</publisher>
+      <group>com.test</group>
+      <name>test-project</name>
+      <version>13.0.1-SNAPSHOT</version>
+      <purl>pkg:maven/com.test/test-project@13.0.1-SNAPSHOT?type=jar</purl>
+    </component>
+  </metadata>
+  <components>
+    <component type="library">
+      <name>logging-framework</name>
+      <version>2.17.1</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.apache.logging/logging-framework@2.17.1?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-logging-fw.com</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>json-processor</name>
+      <version>1.1.4</version>
+      <licenses>
+        <license>
+          <id>MIT</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/com.google.code.gson/json-processor@1.1.4?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-json-p.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>common-collections</name>
+      <version>4.4</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.apache.commons/common-collections@4.4?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-collections.net</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>http-client</name>
+      <version>5.1.3</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.apache.httpcomponents/http-client@5.1.3?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-http.com</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>guava</name>
+      <version>31.0.1-jre</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/com.google.guava/guava@31.0.1-jre?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-guava-lib.io</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>junit-jupiter-api</name>
+      <version>5.8.2</version>
+      <licenses>
+        <license>
+          <id>EPL-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.junit.jupiter/junit-jupiter-api@5.8.2?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-junit5.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>byte-buddy</name>
+      <version>1.12.8</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/net.bytebuddy/byte-buddy@1.12.8?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-bbuddy.net</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>snakeyaml</name>
+      <version>1.30</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.yaml/snakeyaml@1.30?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-yaml.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>caffeine</name>
+      <version>2.9.3</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/com.github.ben-manes.caffeine/caffeine@2.9.3?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-caffeine-cache.com</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>h2-database</name>
+      <version>2.1.210</version>
+      <licenses>
+        <license>
+          <id>MPL-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/com.h2database/h2-database@2.1.210?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-h2db.com</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>jackson-databind</name>
+      <version>2.13.3</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.3?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-jackson-db.com</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>spring-core</name>
+      <version>5.3.19</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.springframework/spring-core@5.3.19?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-spring-project.io</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>slf4j-api</name>
+      <version>1.7.36</version>
+      <licenses>
+        <license>
+          <id>MIT</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.slf4j/slf4j-api@1.7.36?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-slf4j.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>xml-apis</name>
+      <version>1.4.01</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/xml-apis/xml-apis@1.4.01?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-xml.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>netty-buffer</name>
+      <version>4.1.75.Final</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/io.netty/netty-buffer@4.1.75.Final?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-netty.io</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>joda-time</name>
+      <version>2.10.14</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/joda-time/joda-time@2.10.14?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-jodatime.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>assertj-core</name>
+      <version>3.22.0</version>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.assertj/assertj-core@3.22.0?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-assertj.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>mockito-core</name>
+      <version>4.5.1</version>
+      <licenses>
+        <license>
+          <id>MIT</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.mockito/mockito-core@4.5.1?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-mockito.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>protobuf-java</name>
+      <version>3.19.4</version>
+      <licenses>
+        <license>
+          <id>BSD-3-Clause</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/com.google.protobuf/protobuf-java@3.19.4?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-protobuf-dev.com</url>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library">
+      <name>checker-qual</name>
+      <version>3.21.2</version>
+      <licenses>
+        <license>
+          <id>MIT</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/org.checkerframework/checker-qual@3.21.2?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>http://example-checker.org</url>
+        </reference>
+      </externalReferences>
+    </component>
+  </components>
+</bom>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBOM to PDF Policy Generator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jsPDF-AutoTable plugin for creating tables in PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        /* Custom font and styling */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-8 max-w-6xl">
+        <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">SBOM Policy Document Generator</h1>
+                <p class="text-gray-600 mt-2">Select a CycloneDX SBOM file to generate a policy document.</p>
+            </header>
+
+            <main>
+                <!-- File Input Section -->
+                <div class="mb-8 p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 text-center">
+                    <label for="file-input" class="cursor-pointer text-blue-600 font-medium hover:text-blue-800">
+                        Choose an SBOM XML file
+                    </label>
+                    <input type="file" id="file-input" class="hidden" accept=".xml,text/xml">
+                    <p id="file-name" class="text-sm text-gray-500 mt-2">No file selected</p>
+                </div>
+
+                <!-- Section to display main component info -->
+                <div id="main-component-section" class="mb-8" style="display: none;">
+                    <div class="p-6 bg-gray-50 rounded-xl border border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4 text-gray-800">Project Information</h2>
+                        <div id="project-details" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+                            <!-- Project details will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div id="generate-pdf-section" class="text-center mb-8" style="display: none;">
+                    <button id="generate-pdf-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:bg-gray-400">
+                        Generate Policy PDF
+                    </button>
+                    <p id="loading-message" class="text-gray-500 mt-2" style="display: none;">Generating PDF, please wait...</p>
+                </div>
+
+                <!-- Section to display dependency table -->
+                <div id="components-section" class="overflow-x-auto" style="display: none;">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">All Components in SBOM</h2>
+                    <div class="shadow-md rounded-lg overflow-hidden border border-gray-200">
+                        <table class="min-w-full bg-white">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Component Name</th>
+                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License</th>
+                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="components-table-body" class="divide-y divide-gray-200">
+                                <!-- Component data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                 <div id="initial-message" class="text-center text-gray-500 py-10">
+                    Please select an SBOM file to begin.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Store parsed data globally to be accessible by PDF generator
+        let mainComponentInfo = {};
+        let components = [];
+
+        /**
+         * Handles the file selection event.
+         * @param {Event} event - The file input change event.
+         */
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            // Display the selected file name
+            document.getElementById('file-name').textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const xmlContent = e.target.result;
+                parseSbom(xmlContent);
+            };
+            reader.onerror = function() {
+                alert('Error reading file.');
+                resetUI();
+            };
+            reader.readAsText(file);
+        }
+        
+        /**
+         * Resets the UI to its initial state.
+         */
+        function resetUI() {
+            document.getElementById('main-component-section').style.display = 'none';
+            document.getElementById('components-section').style.display = 'none';
+            document.getElementById('generate-pdf-section').style.display = 'none';
+            document.getElementById('initial-message').style.display = 'block';
+            document.getElementById('file-name').textContent = 'No file selected';
+            mainComponentInfo = {};
+            components = [];
+        }
+
+
+        /**
+         * Parses the XML content of the SBOM file. This version correctly handles XML namespaces
+         * and finds all components in the document.
+         * @param {string} xmlContent - The XML content as a string.
+         */
+        function parseSbom(xmlContent) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+
+                const parseError = xmlDoc.querySelector("parsererror");
+                if (parseError && parseError.children.length > 0) {
+                    console.error("Error parsing XML:", parseError.innerHTML);
+                    alert("Failed to parse the SBOM file. It might not be a valid XML file. Please check the console for errors.");
+                    resetUI();
+                    return;
+                }
+                
+                const namespace = xmlDoc.documentElement.namespaceURI;
+
+                if (!namespace || !namespace.includes('cyclonedx')) {
+                    alert("This does not appear to be a valid CycloneDX SBOM file.");
+                    resetUI();
+                    return;
+                }
+
+                const getText = (element, tagName) => {
+                    if (!element) return 'N/A';
+                    const nodes = element.getElementsByTagNameNS(namespace, tagName);
+                    return nodes.length > 0 ? nodes[0].textContent : 'N/A';
+                };
+
+                // --- Extract Main Component Information and its bom-ref ---
+                let mainComponentBomRef = '';
+                const metadataNode = xmlDoc.getElementsByTagNameNS(namespace, "metadata")[0];
+                if (metadataNode) {
+                    // Find the component that is a DIRECT child of metadata, not one nested in <tools>.
+                    const mainComponentNode = Array.from(metadataNode.children)
+                                                   .find(child => child.localName === 'component' && child.namespaceURI === namespace);
+                    if (mainComponentNode) {
+                        mainComponentInfo = {
+                            name: getText(mainComponentNode, "name"),
+                            version: getText(mainComponentNode, "version"),
+                            group: getText(mainComponentNode, "group"),
+                            publisher: getText(mainComponentNode, "publisher"),
+                            purl: getText(mainComponentNode, "purl"),
+                        };
+                        mainComponentBomRef = mainComponentNode.getAttribute('bom-ref');
+                    }
+                }
+
+                // --- Extract ALL components from the document, then filter out the main one ---
+                const allComponentNodes = xmlDoc.getElementsByTagNameNS(namespace, "component");
+                
+                components = Array.from(allComponentNodes)
+                    .filter(node => node.getAttribute('bom-ref') !== mainComponentBomRef) // Exclude the main component from the list
+                    .map(node => {
+                        let license = 'Not Specified';
+                        const licensesNode = node.getElementsByTagNameNS(namespace, 'licenses')[0];
+                        if (licensesNode) {
+                            const licenseNode = licensesNode.getElementsByTagNameNS(namespace, 'license')[0];
+                            if (licenseNode) {
+                                const idNode = licenseNode.getElementsByTagNameNS(namespace, 'id')[0];
+                                if (idNode) {
+                                    license = idNode.textContent;
+                                } else {
+                                    const nameNode = licenseNode.getElementsByTagNameNS(namespace, 'name')[0];
+                                    if (nameNode) {
+                                        license = nameNode.textContent;
+                                    }
+                                }
+                            }
+                        }
+
+                        let url = 'N/A';
+                        const purlNode = node.getElementsByTagNameNS(namespace, 'purl')[0];
+                        const externalRefsNode = node.getElementsByTagNameNS(namespace, 'externalReferences')[0];
+                        if (externalRefsNode) {
+                            const refNodes = Array.from(externalRefsNode.getElementsByTagNameNS(namespace, 'reference'));
+                            const websiteRef = refNodes.find(ref => ref.getAttribute('type') === 'website');
+                            if (websiteRef) {
+                                const urlNode = websiteRef.getElementsByTagNameNS(namespace, 'url')[0];
+                                if (urlNode) {
+                                    url = urlNode.textContent;
+                                }
+                            }
+                        }
+                        
+                        if (url === 'N/A' && purlNode) {
+                            url = purlNode.textContent;
+                        }
+
+                        return {
+                            name: getText(node, "name"),
+                            version: getText(node, "version"),
+                            license: license,
+                            url: url
+                        };
+                    });
+
+                updateUI();
+            } catch (error) {
+                console.error("An error occurred during SBOM parsing:", error);
+                alert("An error occurred. Could not process the SBOM file.");
+                resetUI();
+            }
+        }
+
+        /**
+         * Updates the HTML UI with the parsed SBOM data.
+         */
+        function updateUI() {
+            // Hide initial message and show data sections
+            document.getElementById('initial-message').style.display = 'none';
+            document.getElementById('main-component-section').style.display = 'block';
+            document.getElementById('components-section').style.display = 'block';
+            document.getElementById('generate-pdf-section').style.display = 'block';
+
+            // Update project details card
+            const projectDetailsContainer = document.getElementById('project-details');
+            projectDetailsContainer.innerHTML = `
+                <div><strong class="font-medium text-gray-900">Name:</strong> ${mainComponentInfo.name}</div>
+                <div><strong class="font-medium text-gray-900">Version:</strong> ${mainComponentInfo.version}</div>
+                <div><strong class="font-medium text-gray-900">Group:</strong> ${mainComponentInfo.group}</div>
+                <div><strong class="font-medium text-gray-900">Publisher:</strong> ${mainComponentInfo.publisher}</div>
+                <div class="sm:col-span-2"><strong class="font-medium text-gray-900">PURL:</strong> ${mainComponentInfo.purl}</div>
+            `;
+
+            // Update components table
+            const tableBody = document.getElementById('components-table-body');
+            if (components.length > 0) {
+                tableBody.innerHTML = components.map(comp => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-4 px-6 text-sm font-medium text-gray-900">${comp.name}</td>
+                        <td class="py-4 px-6 text-sm text-gray-500">${comp.version}</td>
+                        <td class="py-4 px-6 text-sm text-gray-500">${comp.license}</td>
+                        <td class="py-4 px-6 text-sm text-gray-500 truncate" style="max-width: 250px;">
+                            <a href="${comp.url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline" title="${comp.url}">${comp.url}</a>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500">No other components found in SBOM.</td></tr>';
+            }
+        }
+
+        /**
+         * Generates and downloads the policy PDF.
+         */
+        function generatePdf() {
+            const btn = document.getElementById('generate-pdf-btn');
+            const loadingMsg = document.getElementById('loading-message');
+            
+            btn.disabled = true;
+            loadingMsg.style.display = 'block';
+
+            setTimeout(() => {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: "landscape" });
+
+                    // --- PDF Header ---
+                    doc.setFontSize(22);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Software Component Policy", doc.internal.pageSize.getWidth() / 2, 20, { align: "center" });
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Generated for: ${mainComponentInfo.name || 'N/A'}`, doc.internal.pageSize.getWidth() / 2, 28, { align: "center" });
+
+                    // --- Main Project Information ---
+                    doc.setFontSize(16);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Project Details", 14, 45);
+                    doc.autoTable({
+                        startY: 50,
+                        head: [['Attribute', 'Value']],
+                        body: [
+                            ['Name', mainComponentInfo.name],
+                            ['Version', mainComponentInfo.version],
+                            ['Group', mainComponentInfo.group],
+                            ['Publisher', mainComponentInfo.publisher],
+                            ['PURL', mainComponentInfo.purl],
+                        ],
+                        theme: 'grid',
+                        headStyles: { fillColor: [41, 128, 185] },
+                    });
+
+                    // --- Dependencies Table ---
+                    const tableBody = components.map(c => [c.name, c.version, c.license, c.url]);
+                    doc.autoTable({
+                        head: [['Component Name', 'Version', 'License', 'URL']],
+                        body: tableBody,
+                        startY: doc.lastAutoTable.finalY + 15,
+                        theme: 'striped',
+                        headStyles: { fillColor: [41, 128, 185] },
+                        columnStyles: {
+                            0: { cellWidth: 50 },
+                            1: { cellWidth: 30 },
+                            2: { cellWidth: 40 },
+                            3: { cellWidth: 'auto' },
+                        },
+                        didDrawPage: function (data) {
+                            // --- PDF Footer on each page ---
+                            doc.setFontSize(10);
+                            const pageCount = doc.internal.getNumberOfPages();
+                            doc.text(`Page ${data.pageNumber} of ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                        }
+                    });
+
+                    // --- Save the PDF ---
+                    doc.save(`Policy-Report-${mainComponentInfo.name || 'SBOM'}.pdf`);
+
+                } catch (error) {
+                    console.error("Error generating PDF:", error);
+                    alert("An error occurred while generating the PDF. Please check the console.");
+                } finally {
+                    btn.disabled = false;
+                    loadingMsg.style.display = 'none';
+                }
+            }, 100);
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('file-input').addEventListener('change', handleFileSelect);
+        document.getElementById('generate-pdf-btn').addEventListener('click', generatePdf);
+
+    </script>
+</body>
+</html>
+
